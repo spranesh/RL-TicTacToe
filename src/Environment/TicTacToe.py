@@ -3,7 +3,7 @@ TicTacToe Environment
 """
 
 import numpy as np
-import Environment.Environment
+import Environment
 import Agent
 
 PLAYER_X = -1
@@ -34,7 +34,7 @@ class TicTacToe(Environment.Environment):
     board = None
 
     # Environment Interface
-    def __init__(self, opponent_starts, opponent, opponent_args):
+    def __init__(self, opponent_starts, opponent, opponent_args=""):
         """
         @opponent_starts - Does the opponent start the game?
         @opponent - string name of the opponent
@@ -42,7 +42,7 @@ class TicTacToe(Environment.Environment):
         """
         Environment.Environment.__init__(self)
         self.opponent = load(opponent, opponent_args)
-        self.opponent_starts = opponent_starts
+        self.opponent_starts = bool(opponent_starts)
 
         self.board = self.__init_board()
 
@@ -68,7 +68,7 @@ class TicTacToe(Environment.Environment):
         if self.opponent_starts:
             action = self.opponent.act(self.board, self.__get_actions(), 0)
             self.__apply_action(action, self.__opponent_mark())
-        return self.board, self.__get_actions(), 0
+        return self.board, self.__get_actions()
 
     def react(self, action):
         # Check action
@@ -77,17 +77,23 @@ class TicTacToe(Environment.Environment):
 
         # Play a turn
         self.__apply_action(action, self.__player_mark())
-        action = self.opponent.act(self.board, self.__get_actions(), 0)
+
+        # Check win
+        winner = self.__check_winner()
+        if winner != PLAYER_N or len(self.__get_actions()) == 0 :
+            self.board = self.__init_board()
+            reward = self.__opponent_mark() * winner
+        else:
+            reward = 0
+
+        action = self.opponent.act(self.board, self.__get_actions(), reward)
         self.__apply_action(action, self.__opponent_mark())
 
         # Check win
         winner = self.__check_winner()
-        if winner == self.__player_mark():
+        if winner != PLAYER_N or len(self.__get_actions()) == 0 :
             self.board = self.__init_board()
-            reward = 1
-        elif winner == self.__player_mark():
-            self.board = self.__init_board()
-            reward = -1
+            reward = self.__player_mark() * winner
         else:
             reward = 0
 
@@ -102,7 +108,7 @@ class TicTacToe(Environment.Environment):
         def get_actions_(board):
             """Enumerate valid actions"""
             for row in xrange(len(board)):
-                for col in xrange(len(row)):
+                for col in xrange(len(board[row])):
                     if self.board[row][col] == 0:
                         yield (row, col)
         return [ x for x in get_actions_(self.board) ]

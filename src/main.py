@@ -33,7 +33,7 @@ def main(epochs, agent, agentArgs, environment, environmentArgs):
 
     agent, environment = load(agent, agentArgs, environment, environmentArgs)
     runner = Runner.Runner(agent, environment)
-    runner.post_act_hook = post_act_hook
+    #runner.post_act_hook = post_act_hook
     runner.post_react_hook = post_react_hook
 
     runner.run(epochs)
