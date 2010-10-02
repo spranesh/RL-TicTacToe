@@ -1,0 +1,11 @@
+Tic-Tac Toe
+--------------
+
+Software Architecture:
+
+RL-Glue mechanism:
+ * "Environment" - Returns a 'state', set of valid actions and a reward.
+ * "Agent" - Returns an action
+ * Run on a common platform
+
+
