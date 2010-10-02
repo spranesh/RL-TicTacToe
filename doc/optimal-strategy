@@ -1,0 +1,57 @@
+Play an X to any corner square. Your choice!
+Then follow the strategy below after O's turn.
+
+O Plays to a Corner Square
+X to either of the remaining open corner squares.
+Once O blocks, X the only remaining corner square.
+Make three X's in a row on your next turn.
+
+O Plays to an Edge Square
+X the center square.
+O must block your threatened win.
+
+Then two Scenarios will arise:
+Block O's threatened win, if applicable, or
+X the corner square not bordered by an O.
+Make three X's in a row on your next turn.
+
+O Plays to the Center Square
+X the square caddy-corner from your original X.
+
+Then two Scenarios will arise:
+O plays to a corner square.
+X the only open corner square. Win next move.
+
+O plays second move to an edge square (draw):
+Block O's threatened win. Block and draw.
+
+
+------------
+
+X has played to a non-center square.
+Play your O to the Center Square.
+Then follow the strategy below after X's turn.
+
+One X on a Corner, the other on an Edge
+O the corner square caddy-corner to the corner X.
+Block or play to any square to draw.
+
+Both X's are on Edge Squares
+When both X's border a corner square (draw):
+O the corner square bordered by the two X's.
+X must block your threatened win.
+O any square. Block and draw.
+
+When both X's don't border a corner (O wins!):
+O either of the remaining open edge squares.
+X must block your threatened win.
+O either corner square bordered by only one X.
+Win on your next move. Amazing!
+
+Both X's on Corner Squares
+O any open edge square.
+X must block your threatened win.
+Both players block and draw.
+
+---------
+If X threatens a win, block and draw. If X does not threaten a win, O a corner square. Block and draw. You're so money and you don't even know it. Thou art master of thy domain
