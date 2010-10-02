@@ -160,14 +160,15 @@ class OptimalAgent(Agent.Agent):
                     shifts = [(-1, 0), (0, -1), (0, 1), (1, 0)]
 
                     corners0 = [ tuple_add(edges[0], m) for m in shifts]
-                    corners0 = [ (i, j) for (i, j) in CORNERS ]
+                    corners0 = [ m for m in corners0 if m in CORNERS ]
 
                     corners1 = [ tuple_add(edges[1], m) for m in shifts]
-                    corners1 = [ (i, j) for (i, j) in CORNERS ]
+                    corners1 = [ m for m in corners1 if m in CORNERS ]
 
+                    common_corner = list(set(corners0).intersection(corners1))
                     # If edges border a corner, take it
-                    if edges[0] == flip(edges[1]):
-                        action = list(set(corners0).intersection(corners1))[0]
+                    if len(common_corner) > 0:
+                        action = common_corner[0]
                     else:
                         corners = list(set(corners0).union(corners1))
                         action = choose(corners)
@@ -177,7 +178,7 @@ class OptimalAgent(Agent.Agent):
                 action = choose(actions)
         return action
 
-    def act(self, state, actions, rewards):
+    def act(self, state, actions, reward, episode_ended):
         # Automatic behaviour - if winning
         pos = self.winning(state, self.mark(state))
         if pos != EMPTY:

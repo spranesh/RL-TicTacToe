@@ -21,7 +21,8 @@ class Environment:
 
     def react(self, action):
         """React to action
-        @returns new state and valid actions, and reward
+        @returns new state and valid actions, and reward, and if episode has
+        ended
         """
         raise NotImplemented()
 

@@ -10,7 +10,15 @@ import re
 import Agent
 import Environment
 
+import psycho
+
 __time__ = 0
+
+class ArgumentError(StandardError):
+    def __init__(self, msg):
+        self.msg = msg
+    def __str__(self):
+        return self.msg
 
 def post_act_hook(env, agent, state, actions, action):
     """Do something after an action has been chosen"""
@@ -22,10 +30,11 @@ def post_act_hook(env, agent, state, actions, action):
     #else:
     #    print __time__, 0,
 
-def post_react_hook(env, agent, state, actions, reward):
+def post_react_hook(env, agent, state, actions, reward, episode_ended):
     """Do something after the environment handles an action"""
     global __time__
-    print reward
+    if episode_ended:
+        print reward
     __time__ += 1
 
 def main(epochs, agent_str, agent_args, env_str, env_args):
@@ -53,7 +62,7 @@ def load(agent_str, agent_args, env_str, env_args):
         agent = getattr(mod, agent_str)
         agent = agent(*agent_args)
     except (ImportError, AssertionError):
-        raise ValueError("Agent '%s' could not be found"%(agent_str))
+        raise ArgumentError("Agent '%s' could not be found"%(agent_str))
 
     try:
         mod = __import__("Environment.%s"%(env_str), fromlist=[Environment])
@@ -61,7 +70,7 @@ def load(agent_str, agent_args, env_str, env_args):
         env = getattr(mod, env_str)
         env = env(*env_args)
     except (ImportError, AssertionError):
-        raise ValueError("Environment '%s' could not be found"%(env_str))
+        raise ArgumentError("Environment '%s' could not be found"%(env_str))
 
     return agent, env
 
@@ -79,6 +88,9 @@ def convert(arg):
         return arg
 
 if __name__ == "__main__":
+    import psycho
+    psycho.full()
+
     import sys
     def main_wrapper():
         """Wrapper around the main call - converts input arguments"""
@@ -105,8 +117,8 @@ if __name__ == "__main__":
                 env_str = env_str[0]
 
                 main(epochs, agent_str, agent_args, env_str, env_args)
-        except ValueError as error:
-            print "[Error]: %s" % (error.message)
+        except ArgumentError as error:
+            print "[Error]: %s" % (str(error))
             print_help(sys.argv)
             sys.exit(1)
     main_wrapper()

@@ -21,15 +21,23 @@ class Runner:
         print "New State: %s, Actions: %s, Reward: %s" % (
                 state, actions, reward)
 
+    def post_episode_hook(self, env, agent, state, actions, reward):
+        """Function called after the episode ends"""
+        print "Episode Ended. New State: %s, Actions: %s, Reward: %s" % (
+                state, actions, reward)
+        
     def run(self, epochs):
         """ Simulate some epochs of running """
 
         state, actions = self.env.start()
         reward = 0
+        episode_ended = True
 
-        for i in xrange(epochs):
-            action = self.agent.act(copy.deepcopy(state), actions, reward)
+        while epochs > 0:
+            action = self.agent.act(copy.deepcopy(state), actions, reward, episode_ended)
             self.post_act_hook(self.env, self.agent, state, actions, action)
-            state, actions, reward = self.env.react(action)
-            self.post_react_hook(self.env, self.agent, state, actions, reward)
+            state, actions, reward, episode_ended = self.env.react(action)
+            self.post_react_hook(self.env, self.agent, state, actions, reward, episode_ended)
+            if episode_ended: 
+                epochs -= 1
 
