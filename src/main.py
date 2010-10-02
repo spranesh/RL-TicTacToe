@@ -10,40 +10,67 @@ import re
 import Agent
 import Environment
 
-time = 0
+__time__ = 0
 
-def post_act_hook(environment, agent, state, actions, action):
+def post_act_hook(env, agent, state, actions, action):
+    """Do something after an action has been chosen"""
     pass
-    #print environment
-    #global time
-    #if action in environment.optimal_actions(state, actions):
-    #    print time, 1,
+    #print env
+    #global __time__
+    #if action in env.optimal_actions(state, actions):
+    #    print __time__, 1,
     #else:
-    #    print time, 0,
+    #    print __time__, 0,
 
-def post_react_hook(environment, agent, state, actions, reward):
-    global time
+def post_react_hook(env, agent, state, actions, reward):
+    """Do something after the environment handles an action"""
+    global __time__
     print reward
-    time += 1
+    __time__ += 1
 
-class ArgumentError(StandardError):
-    def __init__(self, message=""):
-        self.message = message
-
-def main(epochs, agent, agentArgs, environment, environmentArgs):
+def main(epochs, agent_str, agent_args, env_str, env_args):
+    """RL Testbed.
+    @arg epochs: Number of episodes to run for
+    @arg agent_str: String name of agent
+    @arg agent_args: Arguments to the agent constructor
+    @arg env_str: String name of environment
+    @arg env_args: Arguments to the environment constructor
+    """
     # Load agent and environment
 
-    agent, environment = load(agent, agentArgs, environment, environmentArgs)
-    runner = Runner.Runner(agent, environment)
+    agent, env = load(agent_str, agent_args, env_str, env_args)
+    runner = Runner.Runner(agent, env)
     runner.post_act_hook = post_act_hook
     runner.post_react_hook = post_react_hook
 
     runner.run(epochs)
 
-def help(args):
-    print "Usage: %s <epochs> <agent> <environment>"%(args[0])
+def load(agent_str, agent_args, env_str, env_args):
+    """Try to load a class for agents or environment"""
+    try:
+        mod = __import__("Agent.%s"%(agent_str), fromlist=[Agent])
+        assert( hasattr(mod, agent_str) )
+        agent = getattr(mod, agent_str)
+        agent = agent(*agent_args)
+    except (ImportError, AssertionError):
+        raise ValueError("Agent '%s' could not be found"%(agent_str))
+
+    try:
+        mod = __import__("Environment.%s"%(env_str), fromlist=[Environment])
+        assert( hasattr(mod, env_str) )
+        env = getattr(mod, env_str)
+        env = env(*env_args)
+    except (ImportError, AssertionError):
+        raise ValueError("Environment '%s' could not be found"%(env_str))
+
+    return agent, env
+
+def print_help(args):
+    """Print help"""
+    print "Usage: %s <epochs> <agent> <environment>" % (args[0])
 
 def convert(arg):
+    """Convert string arguments to numbers if possible"""
     if arg.isdigit():
         return int(arg)
     elif re.match("[0-9]*\.[0-9]+", arg):
@@ -51,52 +78,35 @@ def convert(arg):
     else:
         return arg
 
-def load(agent, agentArgs, environment, environmentArgs):
-    try:
-        mod = __import__("Agent.%s"%(agent), fromlist=[Agent])
-        assert( hasattr(mod, agent) )
-        agent = getattr(mod, agent)
-        agent = agent(*agentArgs)
-    except (ImportError, AssertionError):
-        raise ArgumentError("Agent '%s' could not be found"%(agent))
-
-    try:
-        mod = __import__("Environment.%s"%(environment), fromlist=[Environment])
-        assert( hasattr(mod, environment) )
-        environment = getattr(mod, environment)
-        environment = environment(*environmentArgs)
-    except (ImportError, AssertionError):
-        raise ArgumentError("Environment '%s' could not be found"%(environment))
-
-    return agent, environment
-
 if __name__ == "__main__":
     import sys
-    try:
-        if "-h" in sys.argv[1:]:
-            help(sys.argv)
-        elif len(sys.argv) < 4:
-            raise ArgumentError("Too few arguments")
-        elif len(sys.argv) > 4:
-            raise ArgumentError("Too many arguments")
-        else:
-            epochs = sys.argv[1]
-            if not epochs.isdigit():
-                raise ArgumentError("Epochs must be a valid integer")
+    def main_wrapper():
+        """Wrapper around the main call - converts input arguments"""
+        try:
+            if "-h" in sys.argv[1:]:
+                print_help(sys.argv)
+            elif len(sys.argv) < 4:
+                raise ValueError("Too few arguments")
+            elif len(sys.argv) > 4:
+                raise ValueError("Too many arguments")
             else:
-                epochs = int(sys.argv[1])
+                epochs = sys.argv[1]
+                if not epochs.isdigit():
+                    raise ValueError("Epochs must be a valid integer")
+                else:
+                    epochs = int(sys.argv[1])
 
-            agent = sys.argv[2].split(":")
-            agentArgs = [convert(arg) for arg in agent[1:]]
-            agent = agent[0]
+                agent_str = sys.argv[2].split(":")
+                agent_args = [convert(arg) for arg in agent_str[1:]]
+                agent_str = agent_str[0]
 
-            environment = sys.argv[3].split(":")
-            environmentArgs = [convert(arg) for arg in environment[1:]]
-            environment = environment[0]
+                env_str = sys.argv[3].split(":")
+                env_args = [convert(arg) for arg in env_str[1:]]
+                env_str = env_str[0]
 
-            main(epochs, agent, agentArgs, environment, environmentArgs)
-    except ArgumentError as e:
-        print "[Error]: %s"%(e.message)
-        help(sys.argv)
-        sys.exit(1)
-
+                main(epochs, agent_str, agent_args, env_str, env_args)
+        except ValueError as error:
+            print "[Error]: %s" % (error.message)
+            print_help(sys.argv)
+            sys.exit(1)
+    main_wrapper()
