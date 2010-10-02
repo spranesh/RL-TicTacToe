@@ -14,11 +14,17 @@ class Environment:
         """
         raise NotImplemented()
 
+    def restart(self, reward):
+        """Restarts the episode
+        @returns new state and valid actions, and reward"""
+        raise NotImplemented()
+
     def react(self, action):
         """React to action
         @returns new state and valid actions, and reward
         """
         raise NotImplemented()
+
 
     def optimal_actions(self, state, actions):
         """Return optimal action for state-action

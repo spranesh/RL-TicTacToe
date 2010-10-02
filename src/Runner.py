@@ -2,6 +2,7 @@
 
 import Agent
 import Environment
+import copy
 
 class Runner:
     def __init__(self, agent, environment):
@@ -19,7 +20,7 @@ class Runner:
         reward = 0
 
         for i in xrange(epochs):
-            action = self.agent.act(state, actions, reward)
+            action = self.agent.act(copy.deepcopy(state), actions, reward)
             self.post_act_hook(self.environment, self.agent, state, actions, action)
             state, actions, reward = self.environment.react(action)
             self.post_react_hook(self.environment, self.agent, state, actions, reward)

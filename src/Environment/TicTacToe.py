@@ -3,6 +3,7 @@ TicTacToe Environment
 """
 
 import numpy as np
+import copy
 import Environment
 import Agent
 
@@ -90,20 +91,19 @@ class TicTacToe(Environment.Environment):
 
         if opponent_starts:
             self.opponent_mark = PLAYER_X
-            action = self.opponent.act(self.board, self.__get_actions(), -1 * reward)
+            action = self.opponent.act(copy.deepcopy(self.board), self.__get_actions(), -1 * reward)
             # We can safely ignore the possibility that a game will end in 1
             # turn
             self.__apply_action(action, self.__opponent_mark())
         else:
             self.opponent_mark = PLAYER_O
-        print "START: ", self.opponent_mark
 
         return self.board, self.__get_actions(), reward
 
     def react(self, action):
         # Check action
         if action not in self.__get_actions():
-            raise ValueError( "%s not a valid action"%(action) )
+            raise ValueError( "%s not a valid action"%(action,) )
 
         # Play player turn
         complete, reward = self.__apply_action(action, self.__player_mark())
@@ -113,7 +113,7 @@ class TicTacToe(Environment.Environment):
             return self.restart(reward)
 
         # Play opponent turn
-        action = self.opponent.act(self.board, self.__get_actions(), reward)
+        action = self.opponent.act(copy.deepcopy(self.board), self.__get_actions(), reward)
         complete, reward = self.__apply_action(action, self.__opponent_mark())
 
         # Handle episode restart
@@ -153,6 +153,7 @@ class TicTacToe(Environment.Environment):
         @returns True if the game has restarted 
         """
         self.board[action[0]][action[1]] = player
+        #print self
 
         # Check win
         winner = self.__check_winner()

@@ -13,7 +13,8 @@ import Environment
 time = 0
 
 def post_act_hook(environment, agent, state, actions, action):
-    print environment
+    pass
+    #print environment
     #global time
     #if action in environment.optimal_actions(state, actions):
     #    print time, 1,
