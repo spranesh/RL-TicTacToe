@@ -10,6 +10,10 @@ PLAYER_X = -1
 PLAYER_N = 0
 PLAYER_O = 1
 
+START_P = 1
+START_O = 2
+START_RND = 3
+
 # Load an agent
 def load(agent, agent_args):
     """Load an agent"""
@@ -27,22 +31,30 @@ class TicTacToe(Environment.Environment):
     TicTacToe Environment
     Expects starting position and opponent Agent to be given
     """
+
     opponent = None
-    opponent_starts = True
+    opponent_mark = None
+    starting_policy = START_RND
 
     # State represented by a 3-value 3x3 board (X, O, -)
     board = None
 
     # Environment Interface
-    def __init__(self, opponent_starts, opponent, opponent_args=""):
+    def __init__(self, starting_policy, opponent, *opponent_args):
         """
-        @opponent_starts - Does the opponent start the game?
+        @starting_policy - Does the opponent start the game?
         @opponent - string name of the opponent
         @opponent_args - string args for the opponent
         """
         Environment.Environment.__init__(self)
         self.opponent = load(opponent, opponent_args)
-        self.opponent_starts = bool(opponent_starts)
+        self.starting_policy = {
+                "random":START_RND,
+                "true":START_O,
+                "True":START_O,
+                "false":START_P,
+                "False":START_P
+                }[starting_policy]
 
         self.board = self.__init_board()
 
@@ -57,46 +69,58 @@ class TicTacToe(Environment.Environment):
                     val += '  '
                 elif col == PLAYER_O: 
                     val += 'O '
-            val[-1] = '\n'
+            val = val[:-1] + '\n'
         return val
     
     def __repr__(self):
         return "[TicTacToe %d]" % (id(self))
 
     def start(self):
+        board, actions, reward = self.restart(0)
+        return board, actions
+
+    def restart(self, reward):
         # Play a round with the opponent
-        if self.opponent_starts:
-            action = self.opponent.act(self.board, self.__get_actions(), 0)
+        if self.starting_policy == START_O :
+            opponent_starts = True
+        elif self.starting_policy == START_RND and np.random.randint(2) == 1:
+            opponent_starts = True
+        else:
+            opponent_starts = False
+
+        if opponent_starts:
+            self.opponent_mark = PLAYER_X
+            action = self.opponent.act(self.board, self.__get_actions(), -1 * reward)
+            # We can safely ignore the possibility that a game will end in 1
+            # turn
             self.__apply_action(action, self.__opponent_mark())
-        return self.board, self.__get_actions()
+        else:
+            self.opponent_mark = PLAYER_O
+        print "START: ", self.opponent_mark
+
+        return self.board, self.__get_actions(), reward
 
     def react(self, action):
         # Check action
         if action not in self.__get_actions():
             raise ValueError( "%s not a valid action"%(action) )
 
-        # Play a turn
-        self.__apply_action(action, self.__player_mark())
+        # Play player turn
+        complete, reward = self.__apply_action(action, self.__player_mark())
 
-        # Check win
-        winner = self.__check_winner()
-        if winner != PLAYER_N or len(self.__get_actions()) == 0 :
-            self.board = self.__init_board()
-            reward = self.__opponent_mark() * winner
-        else:
-            reward = 0
+        # Handle episode restart
+        if complete:
+            return self.restart(reward)
 
+        # Play opponent turn
         action = self.opponent.act(self.board, self.__get_actions(), reward)
-        self.__apply_action(action, self.__opponent_mark())
+        complete, reward = self.__apply_action(action, self.__opponent_mark())
 
-        # Check win
-        winner = self.__check_winner()
-        if winner != PLAYER_N or len(self.__get_actions()) == 0 :
-            self.board = self.__init_board()
-            reward = self.__player_mark() * winner
-        else:
-            reward = 0
+        # Handle episode restart
+        if complete:
+            return self.restart(-1*reward)
 
+        # Otherwise continue
         return self.board, self.__get_actions(), reward
 
     def __init_board(self):
@@ -115,21 +139,29 @@ class TicTacToe(Environment.Environment):
 
     def __opponent_mark(self):
         """Get the mark of the opponent"""
-        if self.opponent_starts: 
-            return PLAYER_X
-        else:
-            return PLAYER_O
+        return self.opponent_mark
 
     def __player_mark(self):
         """Get the mark of the player"""
-        if self.opponent_starts: 
+        if self.opponent_mark == PLAYER_X:
             return PLAYER_O
         else:
             return PLAYER_X
 
     def __apply_action(self, action, player):
-        """Modify state, given the action"""
+        """Modify state, given the action
+        @returns True if the game has restarted 
+        """
         self.board[action[0]][action[1]] = player
+
+        # Check win
+        winner = self.__check_winner()
+        if winner != PLAYER_N or len(self.__get_actions()) == 0 :
+            self.board = self.__init_board()
+            reward = player * winner
+            return True, reward
+        else:
+            return False, 0
 
     def __check_winner(self):
         """Find if there is a winner, and return it"""

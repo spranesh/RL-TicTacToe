@@ -13,11 +13,12 @@ import Environment
 time = 0
 
 def post_act_hook(environment, agent, state, actions, action):
-    global time
-    if action in environment.optimal_actions(state, actions):
-        print time, 1,
-    else:
-        print time, 0,
+    print environment
+    #global time
+    #if action in environment.optimal_actions(state, actions):
+    #    print time, 1,
+    #else:
+    #    print time, 0,
 
 def post_react_hook(environment, agent, state, actions, reward):
     global time
@@ -33,7 +34,7 @@ def main(epochs, agent, agentArgs, environment, environmentArgs):
 
     agent, environment = load(agent, agentArgs, environment, environmentArgs)
     runner = Runner.Runner(agent, environment)
-    #runner.post_act_hook = post_act_hook
+    runner.post_act_hook = post_act_hook
     runner.post_react_hook = post_react_hook
 
     runner.run(epochs)
