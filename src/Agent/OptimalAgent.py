@@ -16,34 +16,51 @@ EDGE_CENTERS = [(0, 1), (1, 0), (1, 2), (2, 1)]
 EMPTY = (-1, -1)
 
 def free_corners(actions):
+    """Get the free corners"""
     return list(set(actions).intersection(CORNERS))
 def free_edges(actions):
+    """Get the free edges"""
     return list(set(actions).intersection(EDGE_CENTERS))
 def free_center(actions):
-    return CENTER in actions
+    """Get the free center"""
+    if CENTER in actions:
+        return CENTER
+    else:
+        return None
 
 def has_corner(board, player):
+    """Checks if player has any corner"""
     return len(get_corners(board, player)) > 0
 def has_edge(board, player):
+    """Checks if player has any edge"""
     return len(get_edges(board, player)) > 0
 def has_center(board, player):
+    """Checks if player has the center"""
     return board[CENTER[0]][CENTER[1]] == player
 
 def get_corners(board, player):
+    """Gets the corners the player has"""
     return [ (i, j) for (i, j) in CORNERS if board[i][j] == player ]
 def get_edges(board, player):
+    """Gets the edges the player has"""
     return [ (i, j) for (i, j) in EDGE_CENTERS if board[i][j] == player ]
 
 def flip(pos):
+    """Flips a position"""
     return (2-pos[0], 2-pos[1])
 
 def choose(lst):
-    if len(lst) == 1:
-        return lst[0]
-    else:
-        return lst[random.randint(len(lst))]
+    """Choose an element from a list"""
+    return lst[random.randint(len(lst))]
+
+def tuple_add(t1, *t2):
+    """Add two tuples"""
+    for t in t2:
+        t1 = tuple([ x + y for (x,y) in zip(t1, t) ])
+    return t1
 
 class OptimalAgent(Agent.Agent):
+    """ Implements the optimal agent """
     def __init__(self):
         Agent.Agent.__init__(self)
 
@@ -55,16 +72,20 @@ class OptimalAgent(Agent.Agent):
         return count/2
 
     def first_player(self, board):
+        """ Checks if the agent is the first player """
         count = abs(board).sum()
         return count % 2 == 0
 
     def mark(self, board):
+        """ Returns the mark of the agent """
         if self.first_player(board):
             return PLAYER_X
         else:
             return PLAYER_O
 
     def winning(self, board, player):
+        """ Checks if the player is winning - and which position is the
+        winning move """
         board = board
         board_t = board.transpose()
         board_ = np.fliplr(board)
@@ -90,6 +111,7 @@ class OptimalAgent(Agent.Agent):
         return pos
 
     def first_player_strategy(self, board, actions):
+        """Strategy for the first player"""
         move_count = self.count_moves(board)
         if move_count == 0:
             # Play any corner
@@ -112,6 +134,7 @@ class OptimalAgent(Agent.Agent):
         return action
 
     def second_player_strategy(self, board, actions):
+        """Strategy for the second player"""
         # If the opponent has played the center, just play corners
         if has_center(board, PLAYER_X):
             if len(free_corners(actions)) > 0:
@@ -124,20 +147,22 @@ class OptimalAgent(Agent.Agent):
                 # The opponent has not played center, play center
                 action = CENTER
             elif move_count == 1:
+                has_edge_X = has_edge(board, PLAYER_X)
+                has_corner_X = has_corner(board, PLAYER_X)
                 # If the opponent has played a corner and an edge
-                if has_edge(board, PLAYER_X) and has_corner(board, PLAYER_X):
+                if has_edge_X and has_corner_X:
                     # Play the opposite corner
                     corner = get_corners(board, PLAYER_X)[0]
                     return flip(corner)
-                elif has_edge(board, PLAYER_X) and not has_corner(board, PLAYER_X):
+                elif has_edge_X and not has_corner_X:
                     edges = get_edges(board, PLAYER_X)
                     # Take the corner bordered by any of the edges
-                    MOVES = [(-1, 0), (0, -1), (0, 1), (1, 0)]
+                    shifts = [(-1, 0), (0, -1), (0, 1), (1, 0)]
 
-                    corners0 = [ (edges[0][0] + i, edges[0][1] + j) for (i, j) in MOVES]
+                    corners0 = [ tuple_add(edges[0], m) for m in shifts]
                     corners0 = [ (i, j) for (i, j) in CORNERS ]
 
-                    corners1 = [ (edges[1][0] + i, edges[1][1] + j) for (i, j) in MOVES]
+                    corners1 = [ tuple_add(edges[1], m) for m in shifts]
                     corners1 = [ (i, j) for (i, j) in CORNERS ]
 
                     # If edges border a corner, take it

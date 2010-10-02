@@ -91,7 +91,8 @@ class TicTacToe(Environment.Environment):
 
         if opponent_starts:
             self.opponent_mark = PLAYER_X
-            action = self.opponent.act(copy.deepcopy(self.board), self.__get_actions(), -1 * reward)
+            board, actions = copy.deepcopy(self.board), self.__get_actions()
+            action = self.opponent.act(board, actions, -1 * reward)
             # We can safely ignore the possibility that a game will end in 1
             # turn
             self.__apply_action(action, self.__opponent_mark())
@@ -113,7 +114,8 @@ class TicTacToe(Environment.Environment):
             return self.restart(reward)
 
         # Play opponent turn
-        action = self.opponent.act(copy.deepcopy(self.board), self.__get_actions(), reward)
+        board, actions = copy.deepcopy(self.board), self.__get_actions()
+        action = self.opponent.act(board, actions, reward)
         complete, reward = self.__apply_action(action, self.__opponent_mark())
 
         # Handle episode restart
