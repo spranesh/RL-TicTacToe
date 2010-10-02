@@ -10,8 +10,6 @@ import re
 import Agent
 import Environment
 
-import psycho
-
 __time__ = 0
 
 class ArgumentError(StandardError):
@@ -88,9 +86,6 @@ def convert(arg):
         return arg
 
 if __name__ == "__main__":
-    import psycho
-    psycho.full()
-
     import sys
     def main_wrapper():
         """Wrapper around the main call - converts input arguments"""
