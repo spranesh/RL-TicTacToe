@@ -1,0 +1,5 @@
+# Temporary Files
+*.swp
+*.swo
+*.pyc
+*.o
