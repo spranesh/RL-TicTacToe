@@ -51,6 +51,9 @@ def main(epochs, agent_str, agent_args, env_str, env_args):
     runner.post_react_hook = post_react_hook
 
     runner.run(epochs)
+    for state in agent.theta: 
+        print state
+        print agent.theta[state]
 
 def load(agent_str, agent_args, env_str, env_args):
     """Try to load a class for agents or environment"""

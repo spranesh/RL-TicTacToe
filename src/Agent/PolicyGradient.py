@@ -4,6 +4,8 @@ Implements a policy-gradient agent
 
 import Agent
 import numpy as np
+import scipy as sp
+import scipy.maxentropy
 from numpy import random
 
 class RandomDistribution:
@@ -11,8 +13,7 @@ class RandomDistribution:
     def __init__(self, pdf):
         """Creates an arbitrary random distribution"""
         self.pdf = np.array(pdf)
-        assert(self.pdf.all())
-        
+        # Some pdf values may be zero - in which case skip their values
         self.cdf = self.__cdf(pdf)
 
     def __cdf(self, pdf):
@@ -25,7 +26,11 @@ class RandomDistribution:
     def __search(self, value):
         """ Linear search for the value """
         for i in xrange(len(self.cdf)):
-            if value < self.cdf[i]:
+            # Check if the width of cdf[i] is 0
+            if i > 0 and self.cdf[i-1] == self.cdf[i]:
+                # If so then skip
+                continue
+            elif value < self.cdf[i]:
                 return i
         else:
             raise ValueError()
@@ -37,9 +42,18 @@ class RandomDistribution:
 class GibbsDistribution(RandomDistribution):
     def __init__(self, pdf, T):
         """Creates an gibbs random distribution"""
-        pdf = np.exp(np.array(pdf)/float(T))
-        pdf /= sum(pdf)
-        print pdf
+        # Normalise distribution - Make it relative to the smallest value
+
+        # Consider only the log values for now
+        pdf = np.array(pdf)
+
+        # Shift by the minimum value of the pdf to prevent overflow
+        log_pdf = (pdf - min(pdf))/float(T)
+        # Compute logsum
+        log_Z = scipy.maxentropy.logsumexp( log_pdf )
+        # Then,
+        pdf = np.exp( log_pdf - log_Z )
+
         RandomDistribution.__init__(self, pdf)
 
 
@@ -63,8 +77,8 @@ class PolicyGradient(Agent.Agent):
     """
 
     theta = {}
-    avg_reward = 0
-    N = 0
+    avg_reward = {}
+    N = {}
     trajectory = []
 
     def __init__(self, beta = 0.1, T = 1):
@@ -87,24 +101,33 @@ class PolicyGradient(Agent.Agent):
 
     def update_theta(self, reward):
         """Updates the action preferences (theta_i)"""
-        if reward != -1:
-            reward = 1
-        self.N += 1
-        self.avg_reward += (reward - self.avg_reward)/float(self.N)
+
+        #start_state = self.trajectory[0]
+        #if not self.N.has_key( start_state ):
+        #    self.N[ start_state ] = 0
+        #    self.avg_reward[ start_state ] = 0
+        #n = self.N[start_state]
+        #avg_reward = self.avg_reward[start_state]
+        #n += 1
+        #avg_reward += (reward - avg_reward)/float(n)
+        #self.N[start_state] = n
+        #self.avg_reward[start_state] = avg_reward
+        
         for state, action in self.trajectory:
             actions = self.theta[state].keys()
             for action_ in actions:
                 val = self.theta[state][action]
                 if action == action_:
-                    update = self.beta * self.avg_reward * (1 - val)
+                    update = self.beta * reward * (1 - val)
                 else:
-                    update = self.beta * self.avg_reward * (-val)
+                    update = self.beta * reward * (-val)
                 self.theta[state][action] += update
 
     def act(self, state, actions, reward, episode_ended):
         # Detect if the episode has finished
-        if episode_ended:
+        if episode_ended and self.trajectory:
             self.update_theta(reward)
+            self.trajectory = []
 
         if not self.theta.has_key(state_(state)):
             self.init_state(state, actions)
