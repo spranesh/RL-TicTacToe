@@ -77,16 +77,13 @@ class PolicyGradient(Agent.Agent):
     """
 
     theta = {}
-    avg_reward = {}
-    N = {}
     trajectory = []
 
-    def __init__(self, beta = 0.1, T = 1):
+    def __init__(self, beta = 0.1, T = 0.1):
         Agent.Agent.__init__(self)
         self.trajectory = []
         self.move_count = 0
         self.beta = beta
-        self.gamma = 0.9
         self.T = T
 
     def init_state(self, state, actions):
@@ -103,28 +100,16 @@ class PolicyGradient(Agent.Agent):
     def update_theta(self, reward):
         """Updates the action preferences (theta_i)"""
 
-        #start_state = self.trajectory[0]
-        #if not self.N.has_key( start_state ):
-        #    self.N[ start_state ] = 0
-        #    self.avg_reward[ start_state ] = 0
-        #n = self.N[start_state]
-        #avg_reward = self.avg_reward[start_state]
-        #n += 1
-        #avg_reward += (reward - avg_reward)/float(n)
-        #self.N[start_state] = n
-        #self.avg_reward[start_state] = avg_reward
-        discount = 1
         self.trajectory.reverse()
         for state, action in self.trajectory:
             actions = self.theta[state].keys()
             for action_ in actions:
                 val = self.theta[state][action]
                 if action == action_:
-                    update = discount * self.beta * reward * (1 - val)
+                    update = self.beta * reward * (1 - val)
                 else:
-                    update = discount * self.beta * reward * (-val)
+                    update = self.beta * reward * (-val)
                 self.theta[state][action] += update
-            discount *= self.gamma
 
     def act(self, state, actions, reward, episode_ended):
         # Detect if the episode has finished
