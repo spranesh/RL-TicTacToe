@@ -31,7 +31,7 @@ class DiscountedPolicyGradient(PolicyGradient.PolicyGradient):
                     update = discount * self.beta * reward * (1 - val)
                 else:
                     update = discount * self.beta * reward * (-val)
-                self.theta[state][action] += update
+                self.theta[state][action_] += update
 
             discount *= self.gamma
 
