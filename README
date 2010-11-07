@@ -8,4 +8,16 @@ RL-Glue mechanism:
  * "Agent" - Returns an action
  * Run on a common platform
 
+ * A sample invocation would be 
 
+      ./main.py 100 "OptimalAgent" "TicTacToe:random:RandomAgent" 
+
+   this starts the TicTacToe with the Agent being the OptimalAgent, and the
+   opponent is a RandomAgent and is randomly chosen to start first; 
+
+ * Another sample invocation would be
+
+      ./main.py 100 "PolicyGradient" "TicTacToe:false:OptimalAgent" 
+
+   This does the same, with the PolicyGradient as the Agent, and the
+   OptimalAgent as the opponent; though now the Agent always starts first.

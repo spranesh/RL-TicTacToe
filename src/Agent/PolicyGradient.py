@@ -11,6 +11,7 @@ from numpy import random
 class RandomDistribution:
     """Represents a generic random distribution"""
     def __init__(self, pdf):
+        self.s = "Random"
         """Creates an arbitrary random distribution"""
         self.pdf = np.array(pdf)
         # Some pdf values may be zero - in which case skip their values
@@ -37,13 +38,13 @@ class RandomDistribution:
 
     def sample(self):
         """ Sample from the distribution """
-        return self.__search(random.random() * self.cdf[-1])
+        a = self.__search(random.random() * self.cdf[-1])
+        # print (self.s, a, self.pdf)
+        return a
 
 class GibbsDistribution(RandomDistribution):
     def __init__(self, pdf, T):
-        """Creates an gibbs random distribution"""
-        # Normalise distribution - Make it relative to the smallest value
-
+        """Creates a gibbs random distribution"""
         # Consider only the log values for now
         pdf = np.array(pdf)
 
@@ -55,6 +56,8 @@ class GibbsDistribution(RandomDistribution):
         pdf = np.exp( log_pdf - log_Z )
 
         RandomDistribution.__init__(self, pdf)
+        # print "Initialising - ", pdf
+        self.s = "Gibbs"
 
 
 def state_(state):
@@ -86,11 +89,10 @@ class PolicyGradient(Agent.Agent):
         self.beta = beta
         self.T = T
 
-    def init_state(self, state, actions):
-        state = state_(state) 
-        self.theta[state] = {}
+    def init_state(self, hashed_state, actions):
+        self.theta[hashed_state] = {}
         for action in actions:
-            self.theta[state][action] = 0
+            self.theta[hashed_state][action] = 0
 
     def detect_episode_boundary(self, state):
         count = self.move_count
@@ -101,27 +103,32 @@ class PolicyGradient(Agent.Agent):
         """Updates the action preferences (theta_i)"""
 
         self.trajectory.reverse()
-        for state, action in self.trajectory:
-            actions = self.theta[state].keys()
-            for action_ in actions:
-                val = self.theta[state][action]
-                if action == action_:
+        for hashed_state, chosen_action in self.trajectory:
+            action_values = self.theta[hashed_state].items()
+            dist = GibbsDistribution( [v for (k,v) in action_values], self.T)
+
+            for i in xrange( len(action_values) ):
+                possible_action = action_values[i][0]
+                val = dist.pdf[i]
+                if possible_action == chosen_action:
                     update = self.beta * reward * (1 - val)
                 else:
                     update = self.beta * reward * (-val)
-                self.theta[state][action] += update
+                self.theta[hashed_state][possible_action] += update
 
     def act(self, state, actions, reward, episode_ended):
+        # Hash the state
+        hashed_state = state_(state)
         # Detect if the episode has finished
         if episode_ended and len(self.trajectory) > 0:
             self.update_theta(reward)
             self.trajectory = []
 
-        if not self.theta.has_key(state_(state)):
-            self.init_state(state, actions)
-        dist = GibbsDistribution( self.theta[state_(state)].values(), self.T)
+        if not self.theta.has_key(hashed_state):
+            self.init_state(hashed_state, actions)
+        dist = GibbsDistribution( self.theta[hashed_state].values(), self.T)
         action = actions[ dist.sample() ]
-        self.trajectory.append((state_(state), action))
+        self.trajectory.append((hashed_state, action))
 
         return action
 

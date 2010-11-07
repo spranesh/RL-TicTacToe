@@ -16,7 +16,7 @@ class Runner:
         """ Function called after the agent returns an Action """
         print "Action %s taken" % (str(action))
 
-    def post_react_hook(self, env, agent, state, actions, reward):
+    def post_react_hook(self, env, agent, state, actions, reward, episode_ended):
         """Function called after the environment acts on the Action"""
         print "New State: %s, Actions: %s, Reward: %s" % (
                 state, actions, reward)
@@ -38,6 +38,7 @@ class Runner:
             self.post_act_hook(self.env, self.agent, state, actions, action)
             state, actions, reward, episode_ended = self.env.react(action)
             self.post_react_hook(self.env, self.agent, state, actions, reward, episode_ended)
+
             if episode_ended: 
                 epochs -= 1
 

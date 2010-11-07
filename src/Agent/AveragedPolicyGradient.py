@@ -26,9 +26,13 @@ class AveragedPolicyGradient(PolicyGradient.PolicyGradient):
             n += 1
             avg_reward += (reward - avg_reward)/float(n)
 
-            actions = self.theta[state].keys()
-            for action_ in actions:
-                val = self.theta[state][action]
+            action_values = self.theta[state].items()
+            dist = PolicyGradient.GibbsDistribution( [v for (k,v) in action_values], self.T)
+
+            for i in xrange( len(action_values) ):
+                action_ = action_values[i][0]
+                val = dist.pdf[i]
+
                 if action == action_:
                     update = self.beta * avg_reward * (1 - val)
                 else:

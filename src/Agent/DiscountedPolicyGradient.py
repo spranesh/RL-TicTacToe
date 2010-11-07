@@ -20,13 +20,18 @@ class DiscountedPolicyGradient(PolicyGradient.PolicyGradient):
         discount = 1
         self.trajectory.reverse()
         for state, action in self.trajectory:
-            actions = self.theta[state].keys()
-            for action_ in actions:
-                val = self.theta[state][action]
+            action_values = self.theta[state].items()
+            dist = PolicyGradient.GibbsDistribution( [v for (k,v) in action_values], self.T)
+
+            for i in xrange( len(action_values) ):
+                action_ = action_values[i][0]
+                val = dist.pdf[i]
+
                 if action == action_:
                     update = discount * self.beta * reward * (1 - val)
                 else:
                     update = discount * self.beta * reward * (-val)
                 self.theta[state][action] += update
+
             discount *= self.gamma
 
