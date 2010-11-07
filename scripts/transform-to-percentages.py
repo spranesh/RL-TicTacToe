@@ -21,14 +21,16 @@ def Main():
   return
 
 def ProcessFile(f):
-  sys.stderr.write("Processing %s\n"%(f))
 
-  fp = open(os.path.join(
-    RESULT_DATA_DIR, os.path.basename(f)), "w")
+  output_filename = os.path.join(RESULT_DATA_DIR, os.path.basename(f))
+
+  sys.stderr.write("Processing %s ++ %s\n"%(f, output_filename))
+
+  fp = open(output_filename, "w")
 
   total_results = 0
   favourable_results = 0
-  for line in open(sys.argv[1]):
+  for line in open(f):
     result = int(line)
     if result != -1:
       favourable_results += 1
