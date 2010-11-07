@@ -23,24 +23,16 @@ class RandomDistribution:
         for i in xrange(1, len(values)):
             values[i] += values[i-1]
         return values
-    
-    def __search(self, value):
-        """ Linear search for the value """
-        for i in xrange(len(self.cdf)):
-            # Check if the width of cdf[i] is 0
-            if i > 0 and self.cdf[i-1] == self.cdf[i]:
-                # If so then skip
-                continue
-            elif value < self.cdf[i]:
-                return i
-        else:
-            raise ValueError()
 
     def sample(self):
-        """ Sample from the distribution """
-        a = self.__search(random.random() * self.cdf[-1])
-        # print (self.s, a, self.pdf)
-        return a
+        """ Sample from the distribution according to the pdf."""
+        r = random.random()
+
+        for (i, p) in enumerate(self.pdf):
+            if r <= p:
+                return i
+            r -= p
+        return len(self.pdf) - 1
 
 class GibbsDistribution(RandomDistribution):
     def __init__(self, pdf, T):
@@ -127,7 +119,7 @@ class PolicyGradient(Agent.Agent):
         if not self.theta.has_key(hashed_state):
             self.init_state(hashed_state, actions)
         dist = GibbsDistribution( self.theta[hashed_state].values(), self.T)
-        action = actions[ dist.sample() ]
+        action = self.theta[hashed_state].keys()[ dist.sample() ]
         self.trajectory.append((hashed_state, action))
 
         return action
