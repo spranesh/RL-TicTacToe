@@ -27,7 +27,7 @@ def load(agent, agent_args):
         raise ValueError("Agent '%s' could not be found"%(agent))
     return agent
 
-class TicTacToe(Environment.Environment):
+class TicTacToeAfterState(Environment.Environment):
     """
     TicTacToe Environment
     Expects starting position and opponent Agent to be given
@@ -64,8 +64,13 @@ class TicTacToe(Environment.Environment):
         val += "[TicTacToe]\n"
         for row in self.board:
             for col in row:
-                val += self.__str_player(col)
-            val += '\n'
+                if col == PLAYER_X: 
+                    val += 'X '
+                elif col == PLAYER_N: 
+                    val += '  '
+                elif col == PLAYER_O: 
+                    val += 'O '
+            val = val[:-1] + '\n'
         return val
     
     def __repr__(self):
@@ -94,31 +99,40 @@ class TicTacToe(Environment.Environment):
         else:
             self.opponent_mark = PLAYER_O
 
+        self.after_state = False
+
         return self.board, self.__get_actions(), reward, True
 
     def react(self, action):
         # Check action
-        if action not in self.__get_actions():
-            raise ValueError( "%s not a valid action"%(action,) )
+        if not self.after_state:
+            if action not in self.__get_actions():
+                raise ValueError( "%s not a valid action"%(action,) )
 
-        # Play player turn
-        complete, reward = self.__apply_action(action, self.__player_mark())
+            # Play player turn
+            complete, reward = self.__apply_action(action, self.__player_mark())
 
-        # Handle episode restart
-        if complete:
-            return self.restart(reward)
+            # Handle episode restart
+            if complete:
+                return self.restart(reward)
 
-        # Play opponent turn
-        board, actions = copy.deepcopy(self.board), self.__get_actions()
-        action = self.opponent.act(board, actions, reward, False)
-        complete, reward = self.__apply_action(action, self.__opponent_mark())
+            self.after_state = True
 
-        # Handle episode restart
-        if complete:
-            return self.restart(reward)
+            # Otherwise continue
+            return self.board, [()], 0, False
+        else:
+            # Play opponent turn
+            board, actions = copy.deepcopy(self.board), self.__get_actions()
+            action = self.opponent.act(board, actions, 0, False)
+            complete, reward = self.__apply_action(action, self.__opponent_mark())
 
-        # Otherwise continue
-        return self.board, self.__get_actions(), reward, False
+            # Handle episode restart
+            if complete:
+                return self.restart(-1*reward)
+            self.after_state = False
+
+            # Otherwise continue
+            return self.board, self.__get_actions(), reward, False
 
     def __init_board(self):
         """Return the empty board - all PLAYER_N"""
@@ -145,41 +159,18 @@ class TicTacToe(Environment.Environment):
         else:
             return PLAYER_X
 
-    def __str_player(self, player):
-        if player == PLAYER_X:
-            return 'X'
-        elif player == PLAYER_O:
-            return 'O'
-        else:
-            return '-'
-
     def __apply_action(self, action, player):
         """Modify state, given the action
         @returns True if the game has restarted 
         """
         self.board[action[0]][action[1]] = player
-        # print self
+        #print self
 
         # Check win
         winner = self.__check_winner()
-        # If the winner function reports a winner, we are done.
-        # If it returns PLAYER_N, we have to check if the board is complete,
-        # before declaring the game done. This is done by 
-        # self.__get_actions() == 0
         if winner != PLAYER_N or len(self.__get_actions()) == 0 :
-            # print
-            # print
-            # print self
-            # print "We are Player", self.__str_player(self.__player_mark())
-            # print "Player %s wins"%(self.__str_player(winner))
             self.board = self.__init_board()
-            if winner == self.__player_mark():
-                reward = 2 
-            elif winner == PLAYER_N:
-                reward = 1
-            else:
-                reward = -1
-            # reward = player * winner
+            reward = player * winner
             return True, reward
         else:
             return False, 0
