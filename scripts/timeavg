@@ -5,14 +5,22 @@
 # Assumes first 'n' (default=1) columns are keys
 
 import operator
+import sys
 
 def tuple_add(t1, t2):
     return tuple(map(lambda x: reduce(operator.add, x), zip(t1,t2)))
 
 def read_from_file(filename):
-    for line in open(filename).readlines():
+    if filename == "-":
+        f = sys.stdin
+    else:
+        f = open( filename )
+
+    for line in f.readlines():
         values = tuple(map(float, line.split()))
         yield values
+
+    f.close()
 
 def time_average(seq, window):
     seq = list(seq)
