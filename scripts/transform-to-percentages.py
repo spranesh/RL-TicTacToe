@@ -10,6 +10,11 @@ def Main():
   if os.path.isdir(RESULT_DATA_DIR) is not True:
     os.mkdir(RESULT_DATA_DIR)
 
+  if len(sys.argv) == 1:
+    sys.stderr.write("This program takes a bunch of files as arguments \
+        converts them into no loss percentages, and writes them \
+        in a percentages folder in the same directory.")
+
   for arg in sys.argv[1:]:
     ProcessFile(arg)
 
