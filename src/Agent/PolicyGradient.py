@@ -81,6 +81,37 @@ class PolicyGradient(Agent.Agent):
         self.beta = beta
         self.T = T
 
+    def print_policy(self, state):
+        actions = self.theta[state]
+        dist = GibbsDistribution( actions.values(), self.T)
+        actions_ = dict( zip( actions.keys(), dist.pdf ) )
+
+        print "=========================="
+        for i in xrange(3):
+            for j in xrange(3):
+                print "|",
+                if state[i][j] == 1:
+                    print "  O  |",
+                elif state[i][j] == -1:
+                    print "  X  |",
+                else:
+                    print "%.2f |"%(actions[(i,j)]),
+            print ""
+        print "=========================="
+
+        print "=========================="
+        for i in xrange(3):
+            for j in xrange(3):
+                print "|",
+                if state[i][j] == 1:
+                    print "  O  |",
+                elif state[i][j] == -1:
+                    print "  X  |",
+                else:
+                    print "%.2f |"%(actions_[(i,j)]),
+            print ""
+        print "=========================="
+
     def init_state(self, hashed_state, actions):
         self.theta[hashed_state] = {}
         for action in actions:
@@ -121,6 +152,7 @@ class PolicyGradient(Agent.Agent):
         dist = GibbsDistribution( self.theta[hashed_state].values(), self.T)
         action = self.theta[hashed_state].keys()[ dist.sample() ]
         self.trajectory.append((hashed_state, action))
+        #self.print_policy( hashed_state )
 
         return action
 

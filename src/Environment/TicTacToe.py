@@ -167,11 +167,6 @@ class TicTacToe(Environment.Environment):
         # before declaring the game done. This is done by 
         # self.__get_actions() == 0
         if winner != PLAYER_N or len(self.__get_actions()) == 0 :
-            # print
-            # print
-            # print self
-            # print "We are Player", self.__str_player(self.__player_mark())
-            # print "Player %s wins"%(self.__str_player(winner))
             self.board = self.__init_board()
             if winner == self.__player_mark():
                 reward = 2 

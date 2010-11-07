@@ -11,13 +11,13 @@ import sys
 import pdb
 
 
-def plot_values(title, xlabel, ylabel, d_titles, values_set, xIdx=0):
+def plotValues(title, xlabel, ylabel, d_titles, valuesSet, xIdx=0):
 
     plt.title( title )
     plt.xlabel( xlabel )
     plt.ylabel( ylabel )
 
-    for label, values in zip(d_titles, values_set):
+    for label, values in zip(d_titles, valuesSet):
         if values.shape[0] == 1:
             values = np.matrix(zip(np.arange(values.shape[1]), values.A[0]))
 
@@ -48,7 +48,7 @@ def main(*args):
         values = map(lambda line: map(float, line.split()), lines)
         data.append(np.matrix(values))
 
-    plot_values(title, xlabel, ylabel, d_titles, data)
+    plotValues(title, xlabel, ylabel, d_titles, data)
 
     # Write to stdout
     #plt.show()

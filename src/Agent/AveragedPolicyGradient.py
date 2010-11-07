@@ -37,7 +37,7 @@ class AveragedPolicyGradient(PolicyGradient.PolicyGradient):
                     update = self.beta * avg_reward * (1 - val)
                 else:
                     update = self.beta * avg_reward * (-val)
-                self.theta[state][action] += update
+                self.theta[state][action_] += update
 
             self.N[state] = n
             self.avg_reward[state] = avg_reward
