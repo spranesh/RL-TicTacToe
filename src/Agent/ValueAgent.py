@@ -41,14 +41,15 @@ class ValueAgent(Agent.Agent):
         # Exploit
         else:
             action = max(actions, key = lambda x: self.Q[state][x])
-        self.old_state = state
-        self.old_action = action
 
         # Update actions
         if episode_ended:
             self.update_Q(self.old_state, self.old_action, None, None, reward)
         else:
             self.update_Q(self.old_state, self.old_action, state, action, reward)
+
+        self.old_state = state
+        self.old_action = action
 
 
         return action
