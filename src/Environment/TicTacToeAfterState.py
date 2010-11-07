@@ -168,9 +168,19 @@ class TicTacToeAfterState(Environment.Environment):
 
         # Check win
         winner = self.__check_winner()
+        # If the winner function reports a winner, we are done.
+        # If it returns PLAYER_N, we have to check if the board is complete,
+        # before declaring the game done. This is done by 
+        # self.__get_actions() == 0
         if winner != PLAYER_N or len(self.__get_actions()) == 0 :
             self.board = self.__init_board()
-            reward = player * winner
+            if winner == self.__player_mark():
+                reward = 2 
+            elif winner == PLAYER_N:
+                reward = 1
+            else:
+                reward = -1
+            # reward = player * winner
             return True, reward
         else:
             return False, 0
