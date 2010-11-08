@@ -4,3 +4,11 @@
 *.pyc
 *.o
 *.txt
+
+*.log
+*.aux
+*.pdf
+*.dvi
+
+body.tex
+output.tex

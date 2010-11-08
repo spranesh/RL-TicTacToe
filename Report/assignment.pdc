@@ -1,0 +1,84 @@
+% RL - Programming Assignment 2
+% Pranesh Srinivasan
+
+
+Question 1
+==========
+
+Part a
+------
+
+Derivation of the policy gradient update.
+
+**Slinky** : can you do this? I can't seem to find my notes for this, and don't
+have too much time tonight.
+
+Part b
+------
+
+We train the gradient policy agent against each of the fixed agents $1000$ times.
+Two such experiments are made --- once with the gradient policy agent being the
+first player, and once with it being the second.
+
+As first player, the policy agent plays rather well, especially against the
+*deterministic* agents.
+
+The rewards for a win, draw, and loss, were $2$, $1$, and $-1$ respectively. An
+initial setting of $1$, $0$, and $-1$ for a win, draw and loss was changed,
+since a draw would lead to no update in the policy preferences, and the bot
+would learn very slowly, or not learn at all[^notlearn].
+
+[^notlearn]: against the optimal bot for instance.
+
+\begin{center}
+\includegraphics[scale=0.7]{charts/1000-policy-gradient-first.eps}
+\end{center}
+
+Its performance as the second player is not as ideal. In particular, its
+performance against the random bot is almost random, even after $1000$ games.
+
+\begin{center}
+\includegraphics[scale=0.7]{charts/1000-policy-gradient-second.eps}
+\end{center}
+
+### Notes
+
+* The optimal policy agent, was hand coded, looking at which squares were
+occupied and which were not.
+
+* The policy gradient algorithm was also implemented in an averaged and
+discounted manner. The performance of both these algorithms can be found below.
+
+* All graphs are the no loss percentages over $1000$ runs against the same bot,
+  averaged over 30 such experiments.
+
+* As can be seen, learning against the optimal agent is a tough ask when the bot
+  loses early on, and exploration is minimal.
+
+\newpage
+
+\begin{center}
+\textbf{Discounted Policy Gradient}
+\vspace{0.15in}
+
+\includegraphics[scale=0.36]{charts/1000-DiscountedPolicyGradient-first.eps}
+\includegraphics[scale=0.36]{charts/1000-DiscountedPolicyGradient-second.eps}
+\end{center}
+
+\vspace{0.6in}
+
+\begin{center}
+\textbf{Averaged Policy Gradient}
+\vspace{0.15in}
+
+\textbf{1000 runs}
+
+\includegraphics[scale=0.36]{charts/1000-AveragedPolicyGradient-first.eps}
+\includegraphics[scale=0.36]{charts/1000-AveragedPolicyGradient-second.eps}
+
+\textbf{3000 runs}
+
+\includegraphics[scale=0.36]{charts/3000-AveragedPolicyGradient-first.eps}
+\includegraphics[scale=0.36]{charts/3000-AveragedPolicyGradient-second.eps}
+\end{center}
+

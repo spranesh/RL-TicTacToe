@@ -1,0 +1,39 @@
+\documentclass[a4paper, 10pt]{report}
+\usepackage[latin1]{inputenc}    % Accept european-encoded (latin1) characters.
+\usepackage{a4wide}              % Wide paper
+\usepackage[parfill]{parskip}		% skip a line instead of indenting new paragraphs
+\usepackage{graphicx}   % For eps figures
+\usepackage{epsfig}     % Alternative package
+ 
+\usepackage{fancyhdr} 
+\fancyhead[L]{\assignment }
+\fancyhead[R]{\class}
+
+\renewcommand{\footrulewidth}{0.5pt} % Insert a line above the footer
+\pagestyle{fancy}
+\usepackage[hang,small,bf]{caption}
+\usepackage{palatino}
+\usepackage{amsmath}
+\usepackage{amssymb}
+ 
+% convenience commands
+\renewcommand{\author}{Arun Chaganty \\ Pranesh Srinivasan}
+\newcommand{\class}{CS6700}
+\newcommand{\instructor}{Prof. B. Ravindran}
+\newcommand{\assignment}{Programming Assignment - 2}
+ 
+\newcounter{prob_num}
+\setcounter{prob_num}{1}
+% usage: \problem
+\newcommand{\problem}{\section{Question \arabic{prob_num}} \stepcounter{prob_num}\par}
+% usage: \head{name}{class}{assignment}
+\newcommand{\head}{\begin{center}\begin{tabular*}{\linewidth}{l@{\extracolsep{\fill}}r}\author & \class\;- \instructor\\ \today & \assignment\end{tabular*}\end{center} \hfill }
+% usage: \eqn{equation}{label}
+\newcommand{\eqn}[2]{\begin{equation}#1\label{#2}\end{equation}}
+ 
+
+\setcounter{secnumdepth}{0}
+\date{\today}
+
+\begin{document}
+\head
